@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from torch.nn.utils import spectral_norm
 def default_conv(in_channels, out_channels, kernel_size, bias=True):
     return nn.Conv2d(
         in_channels, out_channels, kernel_size,
@@ -28,7 +28,7 @@ class BasicBlock(nn.Sequential):
 
         m = [conv(in_channels, out_channels, kernel_size, bias=bias)]
         if bn:
-            m.append(nn.BatchNorm2d(out_channels))
+            m.append(spectral_norm(out_channels))
         if act is not None:
             m.append(act)
 
@@ -44,7 +44,7 @@ class ResBlock(nn.Module):
         for i in range(2):
             m.append(conv(n_feats, n_feats, kernel_size, bias=bias))
             if bn:
-                m.append(nn.BatchNorm2d(n_feats))
+                m.append(spectral_norm(n_feats))
             if i == 0:
                 m.append(act)
 
@@ -66,7 +66,7 @@ class Upsampler(nn.Sequential):
                 m.append(conv(n_feats, 4 * n_feats, 3, bias))
                 m.append(nn.PixelShuffle(2))
                 if bn:
-                    m.append(nn.BatchNorm2d(n_feats))
+                    m.append(spectral_norm(n_feats))
                 if act == 'relu':
                     m.append(nn.ReLU(True))
                 elif act == 'prelu':
@@ -76,7 +76,7 @@ class Upsampler(nn.Sequential):
             m.append(conv(n_feats, 9 * n_feats, 3, bias))
             m.append(nn.PixelShuffle(3))
             if bn:
-                m.append(nn.BatchNorm2d(n_feats))
+                m.append(spectral_norm(n_feats))
             if act == 'relu':
                 m.append(nn.ReLU(True))
             elif act == 'prelu':

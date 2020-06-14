@@ -3,7 +3,7 @@
 from model import common
 
 import torch.nn as nn
-
+from torch.nn.utils import spectral_norm
 def make_model(args, parent=False):
     return RCAN(args)
 
@@ -36,7 +36,7 @@ class RCAB(nn.Module):
         modules_body = []
         for i in range(2):
             modules_body.append(conv(n_feat, n_feat, kernel_size, bias=bias))
-            if bn: modules_body.append(nn.BatchNorm2d(n_feat))
+            if bn: modules_body.append(spectral_norm(n_feat))
             if i == 0: modules_body.append(act)
         modules_body.append(CALayer(n_feat, reduction))
         self.body = nn.Sequential(*modules_body)

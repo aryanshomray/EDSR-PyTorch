@@ -1,7 +1,7 @@
 from model import common
 
 import torch.nn as nn
-
+from torch.nn.utils import spectral_norm
 class Discriminator(nn.Module):
     '''
         output is not normalized
@@ -23,7 +23,7 @@ class Discriminator(nn.Module):
                     stride=stride,
                     bias=False
                 ),
-                nn.BatchNorm2d(_out_channels),
+                spectral_norm(_out_channels),
                 nn.LeakyReLU(negative_slope=0.2, inplace=True)
             )
 
