@@ -40,19 +40,19 @@ class ResBlock(nn.Module):
         bias=True, bn=False, act=nn.ReLU(True), res_scale=1):
 
         super(ResBlock, self).__init__()
-        self.m = []
+        m = []
         for i in range(2):
-            self.m.append(conv(n_feats, n_feats, kernel_size, bias=bias))
+            m.append(spectral_norm(conv(n_feats, n_feats, kernel_size, bias=bias)))
             if bn:
-                self.m.append(spectral_norm(n_feats))
+                m.append(spectral_norm(n_feats))
             if i == 0:
-                self.m.append(act)
+                m.append(act)
 
-        self.body = nn.Sequential(*self.m)
+        self.body = nn.Sequential(*m)
         self.res_scale = res_scale
 
     def forward(self, x):
-        res = F.relu(self.m[1](F.relu(spectral_norm(self.m[0](x))))).mul(self.res_scale)
+        res = self.body(x).mul(self.res_scale)
         res += x
 
         return res
